@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+media/
+staticfiles/
+.env
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# PyCharm
+*.iml
+
+# Migrations (ixtiyoriy: agar versioning qilmoqchi bo'lmasang)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# Byte-compiled / optimized / DLL files
+*.so
+
+# pip install cache
+pip-wheel-metadata/
+__pypackages__/
+
+# Coverage / test
+htmlcov/
+.tox/
+.coverage
+.cache/
+pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Build
+build/
+dist/
+*.egg-info/
+
