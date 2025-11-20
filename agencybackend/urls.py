@@ -25,7 +25,7 @@ urlpatterns = [
     # Ro‘yxatdan o‘tish
     path('api/register/', RegisterView.as_view(), name='register'),
 
-    path('packages/', include('packages.url'), name='packages'),
+    path('packages/', include('packages.urls'), name='packages'),
 
     # Login (JWT token olish)
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
