@@ -6,7 +6,18 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 
+# frontend refresh token bilan yuboradi (cookie orqali)
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('refresh_token')  # Cookie'dan tokenni olish
+        if not refresh_token:
+            return Response({'detail': 'Refresh token not provided'}, status=400)
+
+        # request.data ichida refresh token yuborish
+        request.data['refresh'] = refresh_token
+        return super().post(request, *args, **kwargs)
 
 
 class TokenRefreshFromCookieView(APIView):
@@ -37,9 +48,9 @@ class RegisterSerializer(ModelSerializer):
 
     def create(self, validated_data):
         # remember_me ni olib tashlaymiz, chunki User modeli buni qabul qilmaydi
-        validated_data.pop('remember_me', None)
+        remember_me = validated_data.pop('remember_me', None)
         user = User.objects.create_user(**validated_data)
-        return user
+        return user, remember_me
 
 # --------------------
 # View
@@ -52,9 +63,9 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        data = serializer.save()
+        user, remember_me = data[0], data[1]
 
-        remember_me = serializer.is_valid.get('remember_me', False)
 
         # JWT token yaratish
         refresh = RefreshToken.for_user(user)

@@ -1,4 +1,6 @@
 from django.db import models
+from django.template.defaultfilters import title
+
 
 # --------------------
 # Kategoriya
@@ -45,12 +47,18 @@ class TourImage(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="images")
     url = models.URLField()
 
+    def __str__(self):
+        return self.url
+
 # --------------------
 # Highlights
 # --------------------
 class Highlight(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="highlights")
     text = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.text
 
 # --------------------
 # Included / Not Included
@@ -59,9 +67,15 @@ class IncludedItem(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="included")
     text = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.text
+
 class NotIncludedItem(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="not_included")
     text = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.text
 
 # --------------------
 # Itinerary
@@ -71,9 +85,15 @@ class ItineraryDay(models.Model):
     day = models.PositiveIntegerField()
     title = models.CharField(max_length=255)
 
+    def __str__(self):
+        return f"{self.day} - {self.title}"
+
 class ItineraryActivity(models.Model):
     itinerary_day = models.ForeignKey(ItineraryDay, on_delete=models.CASCADE, related_name="activities")
     activity = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.activity
 
 # --------------------
 # Facilities
@@ -83,3 +103,5 @@ class Facility(models.Model):
     name = models.CharField(max_length=100)
     icon = models.CharField(max_length=10)  # Emoji yoki ikon URL
 
+    def __str__(self):
+        return self.name
