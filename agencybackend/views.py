@@ -1,12 +1,60 @@
 from datetime import timedelta
 from django.contrib.auth.models import User
 from rest_framework import generics, serializers
-from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenRefreshView
+
+class CustomLoginAPIView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, **kwargs):
+        print(**kwargs)
+        username = request.data.get("username")
+        password = request.data.get("password")
+        remember_me = request.data.get("remember_me", False)
+
+        # Django ning default authenticate — faqat username orqali ishlaydi
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            return Response({"detail": "Username yoki parol noto'g'ri"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # JWT token yaratish
+        refresh = RefreshToken.for_user(user)
+
+        # Refresh muddati
+        if remember_me:
+            refresh.set_exp(lifetime=timedelta(days=30))
+        else:
+            refresh.set_exp(lifetime=timedelta(hours=1))
+
+        access_token = str(refresh.access_token)
+
+        # Javob
+        response = Response({
+            'access': access_token
+        })
+
+        # Refresh token cookie’da
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            httponly=True,
+            secure=False,  # production -> True
+            samesite='Lax',
+            max_age=30 * 24 * 60 * 60 if remember_me else 3600,
+            path="/"
+        )
+
+        return response
+
 
 # frontend refresh token bilan yuboradi (cookie orqali)
 class CustomTokenRefreshView(TokenRefreshView):
@@ -24,7 +72,9 @@ class TokenRefreshFromCookieView(APIView):
     """
     Refresh token cookie orqali keladi va yangi access token qaytariladi
     """
-    def post(self, request):
+
+    @staticmethod
+    def post(request):
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:
@@ -36,11 +86,14 @@ class TokenRefreshFromCookieView(APIView):
             return Response({'access': access_token})
         except TokenError:
             return Response({'detail': 'Invalid refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 # --------------------
 # Serializer
 # --------------------
 class RegisterSerializer(ModelSerializer):
     remember_me = serializers.BooleanField()
+
     class Meta:
         model = User
         fields = ("username", "password", "email", "remember_me")
@@ -52,10 +105,12 @@ class RegisterSerializer(ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user, remember_me
 
+
 # --------------------
 # View
 # --------------------
 class RegisterView(generics.CreateAPIView):
+    # TODO: requestdan username ko'rinishida orasi _ bilan to'ldirilgan ism-familiya keladi. Bu holatni qayta o'ylab ko'rish kerak.
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
@@ -65,7 +120,6 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.save()
         user, remember_me = data[0], data[1]
-
 
         # JWT token yaratish
         refresh = RefreshToken.for_user(user)
@@ -84,10 +138,10 @@ class RegisterView(generics.CreateAPIView):
         response.set_cookie(
             key='refresh_token',
             value=str(refresh),
-            httponly=True,           # JS orqali ko'rinmaydi
-            secure=False,            # HTTPS bo'lsa True qilishingiz mumkin
+            httponly=True,  # JS orqali ko'rinmaydi
+            secure=False,  # HTTPS bo'lsa True qilishingiz mumkin
             samesite='Lax',
-            max_age=30*24*60*60 if remember_me else 3600
+            max_age=30 * 24 * 60 * 60 if remember_me else 3600
         )
 
         return response
