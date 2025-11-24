@@ -92,18 +92,15 @@ class TokenRefreshFromCookieView(APIView):
 # Serializer
 # --------------------
 class RegisterSerializer(ModelSerializer):
-    remember_me = serializers.BooleanField()
-
     class Meta:
         model = User
-        fields = ("username", "password", "email", "remember_me")
+        fields = ("username", "password", "email")
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         # remember_me ni olib tashlaymiz, chunki User modeli buni qabul qilmaydi
-        remember_me = validated_data.pop('remember_me', None)
         user = User.objects.create_user(**validated_data)
-        return user, remember_me
+        return user
 
 
 # --------------------
@@ -118,15 +115,10 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.save()
-        user, remember_me = data[0], data[1]
+        user = serializer.save()
 
         # JWT token yaratish
         refresh = RefreshToken.for_user(user)
-        if remember_me:
-            refresh.set_exp(lifetime=timedelta(days=30))
-        else:
-            refresh.set_exp(lifetime=timedelta(hours=1))
 
         # Access token
         access_token = str(refresh.access_token)
@@ -141,7 +133,6 @@ class RegisterView(generics.CreateAPIView):
             httponly=True,  # JS orqali ko'rinmaydi
             secure=False,  # HTTPS bo'lsa True qilishingiz mumkin
             samesite='Lax',
-            max_age=30 * 24 * 60 * 60 if remember_me else 3600
         )
 
         return response
