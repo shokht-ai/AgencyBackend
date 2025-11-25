@@ -59,18 +59,6 @@ class CustomLoginAPIView(TokenObtainPairView):
         return response
 
 
-# frontend refresh token bilan yuboradi (cookie orqali)
-class CustomTokenRefreshView(TokenRefreshView):
-    def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get('refresh_token')  # Cookie'dan tokenni olish
-        if not refresh_token:
-            return Response({'detail': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # request.data ichida refresh token yuborish
-        request.data['refresh'] = refresh_token
-        return super().post(request, *args, **kwargs)
-
-
 class TokenRefreshFromCookieView(APIView):
     """
     Refresh token cookie orqali keladi va yangi access token qaytariladi

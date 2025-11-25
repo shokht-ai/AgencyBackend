@@ -16,17 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import RegisterView, CustomTokenRefreshView, CustomLoginAPIView
+from .views import RegisterView, TokenRefreshFromCookieView, CustomLoginAPIView
+
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Ro‘yxatdan o‘tish
-    path('api/register/', RegisterView.as_view(), name='register'),
-
     path('packages/', include('packages.urls'), name='packages'),
 
+    # Ro‘yxatdan o‘tish
+    path('api/register/', RegisterView.as_view(), name='register'),
     # Login (JWT token olish)
     path('api/login/', CustomLoginAPIView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/refresh/', TokenRefreshFromCookieView.as_view(), name='token_refresh'),
 ]
