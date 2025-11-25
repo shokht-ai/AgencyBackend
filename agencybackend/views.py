@@ -51,7 +51,7 @@ class CustomLoginAPIView(TokenObtainPairView):
             value=str(refresh),
             httponly=True,
             secure=os.getenv('DEBUG') != 'True',  # production -> True
-            samesite='Lax',
+            samesite='None',
             max_age=30 * 24 * 60 * 60 if remember_me else 3600,
             path="/api/refresh/"
         )
