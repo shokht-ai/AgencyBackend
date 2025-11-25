@@ -15,7 +15,6 @@ class CustomLoginAPIView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
     def post(self, request, **kwargs):
-        print(**kwargs)
         username = request.data.get("username")
         password = request.data.get("password")
         remember_me = request.data.get("remember_me", False)
@@ -50,7 +49,7 @@ class CustomLoginAPIView(TokenObtainPairView):
             secure=False,  # production -> True
             samesite='Lax',
             max_age=30 * 24 * 60 * 60 if remember_me else 3600,
-            path="/"
+            path="/api/refresh/"
         )
 
         return response
@@ -61,7 +60,7 @@ class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')  # Cookie'dan tokenni olish
         if not refresh_token:
-            return Response({'detail': 'Refresh token not provided'}, status=400)
+            return Response({'detail': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
         # request.data ichida refresh token yuborish
         request.data['refresh'] = refresh_token
@@ -78,7 +77,7 @@ class TokenRefreshFromCookieView(APIView):
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:
-            return Response({'detail': 'Refresh token mavjud emas.'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Refresh token mavjud emas.'}, status=status.HTTP_424_FAILED_DEPENDENCY)
 
         try:
             refresh = RefreshToken(refresh_token)
@@ -115,24 +114,7 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        serializer.save()
 
-        # JWT token yaratish
-        refresh = RefreshToken.for_user(user)
+        return Response(status=status.HTTP_201_CREATED)
 
-        # Access token
-        access_token = str(refresh.access_token)
-
-        # Response yaratish va cookie o'rnatish
-        response = Response({
-            'access': access_token
-        })
-        response.set_cookie(
-            key='refresh_token',
-            value=str(refresh),
-            httponly=True,  # JS orqali ko'rinmaydi
-            secure=False,  # HTTPS bo'lsa True qilishingiz mumkin
-            samesite='Lax',
-        )
-
-        return response
