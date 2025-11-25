@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.contrib.auth.models import User
-from rest_framework import generics, serializers
+from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import ModelSerializer
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
@@ -10,6 +10,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+
+import os
+from dotenv import load_dotenv
+load_dotenv('../.env')
 
 class CustomLoginAPIView(TokenObtainPairView):
     permission_classes = [AllowAny]
@@ -46,7 +50,7 @@ class CustomLoginAPIView(TokenObtainPairView):
             key='refresh_token',
             value=str(refresh),
             httponly=True,
-            secure=False,  # production -> True
+            secure=os.getenv('DEBUG') != 'True',  # production -> True
             samesite='Lax',
             max_age=30 * 24 * 60 * 60 if remember_me else 3600,
             path="/api/refresh/"
