@@ -1,0 +1,226 @@
+Albatta! Siz yaratgan **UserProfile, UserAvatar, Booking, Favorite, Notification** modellari uchun **endpointlar** va **JSON so‘rovlar (request body)** misollarini tayyorlab berdim.
+
+---
+
+# 1️⃣ **UserProfile**
+
+## 🔹 Endpoint
+
+```
+PUT /api/profile/
+```
+
+## 🔹 Request (update profile)
+
+```json
+{
+  "phone": "+998901234567",
+  "birth_date": "1995-05-15",
+  "address": "Toshkent, O'zbekiston"
+}
+```
+
+## 🔹 Response
+
+```json
+{
+  "id": 1,
+  "user": {
+    "id": 10,
+    "username": "kamola.rahimova",
+    "first_name": "Kamola",
+    "last_name": "Rahimova",
+    "email": "kamola.rahimova@email.com"
+  },
+  "phone": "+998901234567",
+  "birth_date": "1995-05-15",
+  "address": "Toshkent, O'zbekiston"
+}
+```
+
+---
+
+# 2️⃣ **UserAvatar**
+
+## 🔹 Endpoint
+
+```
+PUT /api/avatar/
+```
+
+## 🔹 Request (multipart/form-data)
+
+```
+Key: avatar
+Value: <file: profile.jpg>
+```
+
+## 🔹 Response
+
+```json
+{
+  "id": 1,
+  "user": 1,
+  "avatar": "http://localhost:8000/media/avatar/profile.jpg"
+}
+```
+
+---
+
+# 3️⃣ **Booking**
+
+## 🔹 Create Booking
+
+```
+POST /api/bookings/
+```
+
+### Request
+
+```json
+{
+  "tour": 5,
+  "status": 1,
+  "date": "2024-12-15",
+  "guests": 2,
+  "price": 5000000
+}
+```
+
+### Response
+
+```json
+{
+  "id": 12,
+  "user": 10,
+  "tour": 5,
+  "status": 1,
+  "date": "2024-12-15",
+  "guests": 2,
+  "price": 5000000,
+  "booking_date": "2024-11-26",
+  "rating": null
+}
+```
+
+## 🔹 Delete Booking
+
+```
+DELETE /api/bookings/12/
+```
+
+Response: `204 No Content`
+
+---
+
+# 4️⃣ **Favorite**
+
+## 🔹 Create Favorite
+
+```
+POST /api/favorites/
+```
+
+### Request
+
+```json
+{
+  "tour": 5
+}
+```
+
+### Response
+
+```json
+{
+  "id": 3,
+  "user": 10,
+  "tour": 5,
+  "created_at": "2024-11-26T12:34:56Z"
+}
+```
+
+## 🔹 Delete Favorite
+
+```
+DELETE /api/favorites/3/
+```
+
+Response: `204 No Content`
+
+---
+
+# 5️⃣ **Notification**
+
+## 🔹 Create Notification
+
+```
+POST /api/notifications/
+```
+
+### Request
+
+```json
+{
+  "notif_type": 1,
+  "title": "Sayohatingiz tasdiqlandi",
+  "message": "Dubai Premium Safari sayohatingiz tasdiqlandi"
+}
+```
+
+### Response
+
+```json
+{
+  "id": 5,
+  "user": 10,
+  "notif_type": 1,
+  "title": "Sayohatingiz tasdiqlandi",
+  "message": "Dubai Premium Safari sayohatingiz tasdiqlandi",
+  "created_at": "2024-11-26T12:45:00Z",
+  "read": false
+}
+```
+
+## 🔹 Update Notification (mark as read)
+
+```
+PATCH /api/notifications/5/
+```
+
+### Request
+
+```json
+{
+  "read": true
+}
+```
+
+### Response
+
+```json
+{
+  "id": 5,
+  "user": 10,
+  "notif_type": 1,
+  "title": "Sayohatingiz tasdiqlandi",
+  "message": "Dubai Premium Safari sayohatingiz tasdiqlandi",
+  "created_at": "2024-11-26T12:45:00Z",
+  "read": true
+}
+```
+
+---
+
+💡 **Qisqa tavsiyalar:**
+
+1. **Authentication** kerak (`request.user` ishlatiladi) → token header jo‘natish
+2. File upload → `multipart/form-data`
+3. Delete response doim `204 No Content`
+4. Update → `PUT` yoki `PATCH`
+
+---
+
+Agar xohlasang, men sizga **Postman yoki Swagger uchun tayyor JSON + URL jadvalini** to‘liq yozib beraman, shunchaki bitta faylga import qilib ishlatishingiz mumkin.
+
+Shuni qilaylikmi?

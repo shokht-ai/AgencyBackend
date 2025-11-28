@@ -17,13 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .views import RegisterView, TokenRefreshFromCookieView, CustomLoginAPIView
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('packages/', include('packages.urls'), name='packages'),
+    path('user/', include('userProfile.urls'), name='userprofile'),
 
     # Ro‘yxatdan o‘tish
     path('api/register/', RegisterView.as_view(), name='register'),
@@ -31,3 +33,6 @@ urlpatterns = [
     path('api/login/', CustomLoginAPIView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshFromCookieView.as_view(), name='token_refresh'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

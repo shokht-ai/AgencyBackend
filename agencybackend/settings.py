@@ -33,8 +33,8 @@ ALLOWED_HOSTS = str(os.getenv('ALLOWED_HOSTS')).split(',')
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),   # Access token muddati
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=0.5),      # Refresh token muddati
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # Access token muddati
+    # "REFRESH_TOKEN_LIFETIME": timedelta(days=1),      # Refresh token muddati
     "ROTATE_REFRESH_TOKENS": False,
 }
 # Application definition
@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'packages'
+    'packages',
+    'userProfile'
 ]
 
 MIDDLEWARE = [
@@ -146,6 +147,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT =  str(os.getenv('STATIC_ROOT', ''))
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

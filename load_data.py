@@ -11,6 +11,7 @@ from packages.models import (
     IncludedItem, NotIncludedItem, ItineraryDay, ItineraryActivity,
     Facility
 )
+from userProfile.models import (BookingStatus, NotificationStatus)
 
 # JSON ma'lumot
 data = [
@@ -350,6 +351,18 @@ data = [
   }
 ]
 
+data2 = {
+    "bookingStatus": [
+        'Kutilmoqda',
+        'Tugallandi',
+        'Bekor qilindi'
+    ],
+    "notificationStatus": [
+        'Confirmation',
+        'Discount',
+        'Reminder'
+    ]
+}
 
 for tour_data in data:
     # Agency va Category
@@ -402,4 +415,10 @@ for tour_data in data:
     for fac in tour_data.get("facilities", []):
         Facility.objects.create(tour=tour_obj, name=fac["name"], icon=fac.get("icon", ""))
 
-print("Tours imported successfully!")
+for data in data2["bookingStatus"]:
+    BookingStatus.objects.get_or_create(name=data)
+
+for data in data2["notificationStatus"]:
+    NotificationStatus.objects.get_or_create(name=data)
+
+print("Datas imported successfully!")

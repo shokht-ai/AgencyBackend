@@ -109,3 +109,13 @@ class TourSerializer(serializers.ModelSerializer):
         items = NotIncludedItem.objects.filter(tour=obj)
         return [i.text for i in items]
 
+
+class TourBookingSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+    class Meta:
+        model = Tour
+        fields = ['title', 'agency', 'images']
+
+    def get_images(self, obj):
+        images_data = TourImage.objects.filter(tour=obj.pk)
+        return [i.url for i in images_data]
