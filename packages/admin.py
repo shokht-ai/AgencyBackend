@@ -15,5 +15,4 @@ _all = [
     Facility
 ]
 
-for i in _all:
-    admin.site.register(i)
+admin.site.register(_all)

@@ -11,7 +11,18 @@ from packages.models import (
     IncludedItem, NotIncludedItem, ItineraryDay, ItineraryActivity,
     Facility
 )
-from userProfile.models import (BookingStatus, NotificationStatus)
+from userProfile.models import NotificationStatus
+from booking_transaction.models import BookingStatus
+
+# from cryptography.fernet import Fernet
+#
+# # Kalitni yaratish
+# key = Fernet.generate_key()
+#
+# # Kalitni .env faylida saqlash (bu faqat bir marta amalga oshiriladi)
+# with open(".env", "a") as env_file:
+#     env_file.write(f"FERNET_KEY={key.decode()}\n")
+
 
 # JSON ma'lumot
 data = [
@@ -353,11 +364,12 @@ data = [
 
 data2 = {
     "bookingStatus": [
-        'Kutilmoqda',
-        'Tugallandi',
-        'Bekor qilindi'
+        'upcoming',
+        'completed',
+        'cancelled'
     ],
     "notificationStatus": [
+        'Ordering',
         'Confirmation',
         'Discount',
         'Reminder'

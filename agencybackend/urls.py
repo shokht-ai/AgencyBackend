@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import RegisterView, TokenRefreshFromCookieView, CustomLoginAPIView
+from .views import RegisterView, TokenRefreshFromCookieView, CustomLoginAPIView, LogoutView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -26,12 +26,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('packages/', include('packages.urls'), name='packages'),
     path('user/', include('userProfile.urls'), name='userprofile'),
+    path('purchase-travelers/', include('booking_transaction.urls'), name='purchase-travelers'),
 
     # Ro‘yxatdan o‘tish
     path('api/register/', RegisterView.as_view(), name='register'),
     # Login (JWT token olish)
     path('api/login/', CustomLoginAPIView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshFromCookieView.as_view(), name='token_refresh'),
+    path('api/logout/', LogoutView.as_view(), name='logout')
 ]
 
 if settings.DEBUG:

@@ -6,12 +6,9 @@ from .models import *
 _all = [
     UserProfile,
     UserAvatar,
-    Booking,
-    BookingStatus,
     Favorite,
     Notification,
     NotificationStatus
 ]
 
-for i in _all:
-    admin.site.register(i)
+admin.site.register(_all)

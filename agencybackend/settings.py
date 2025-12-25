@@ -23,22 +23,47 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = str(os.getenv("SECRET_KEY"))
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(os.getenv('DEBUG')) == 'True'
 
-# ALLOWED_HOSTS = ['*']
+
 ALLOWED_HOSTS = str(os.getenv('ALLOWED_HOSTS')).split(',')
 
-
-
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # Access token muddati
-    # "REFRESH_TOKEN_LIFETIME": timedelta(days=1),      # Refresh token muddati
-    "ROTATE_REFRESH_TOKENS": False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),   # Access token muddati
+    'ROTATE_REFRESH_TOKENS': True,  # refresh tokenni ishlatilganda yangilash
+    'BLACKLIST_AFTER_ROTATION': True,  # eski refresh tokenni blacklistga qo‘yish
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,  # kuchli, tasodifiy GENERATE qilingan secret
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
-# Application definition
 
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CORS_ALLOW_CREDENTIALS = True
+SESSION_COOKIE_SAMESITE = 'None'  # cross-site cookie
+# CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,9 +72,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'packages',
-    'userProfile'
+    'userProfile',
+    'booking_transaction'
 ]
 
 MIDDLEWARE = [
@@ -64,17 +92,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-# ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # agar API asosan auth talab qilsa
+    ),
 }
 
 
@@ -109,6 +134,12 @@ DATABASES = {
     }
 }
 
+# # Sessiya cookie muddati (sekundlarda). Masalan, 1 oylik sessiya (30 kun)
+# SESSION_COOKIE_AGE = 30 * 24 * 60 * 60  # 30 kun
+
+# # Sessiya cookie eksprasi (cookie uchun muddati o'tgan sana).
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Browserni yopinganda sessiya o'chmasligi uchun
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -128,24 +159,32 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'agencybackend.authentication.EmailBackend',  # yangi backend
+    'django.contrib.auth.backends.ModelBackend',  # default
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
 
-USE_I18N = True
+# USE_I18N = True
+USE_I18N = False
 
-USE_TZ = True
+# USE_TZ = True
+USE_TZ = False
+TIME_ZONE = 'Asia/Tashkent'
+
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT =  str(os.getenv('STATIC_ROOT', ''))
+STATIC_ROOT =  BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -153,3 +192,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# from cryptography.fernet import Fernet
+# key = Fernet.generate_key()
+#
+# with open('.env', '') as f:
+#     f.write(f"FERNET_KEY={key.decode()}")
+
+# FERNET_KEY o'zgaruvchisini olish
+FERNET_KEY = os.getenv("FERNET_KEY")

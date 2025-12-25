@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from packages.models import Tour
+from cryptography_modelFiled import EncryptedField
+from booking_transaction.models import Country
 
 
 # ============================
@@ -16,6 +18,19 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.get_full_name()
 
+class UserBankCardInfo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="customer_bankcard_info")
+    card_number = EncryptedField(max_length=200, null=True, blank=True)
+    card_owner = EncryptedField(max_length=100, null=True, blank=True)
+    card_validity_period = EncryptedField(max_length=100, null=True, blank=True)
+    card_cvv = EncryptedField(max_length=100, null=True, blank=True)
+
+class UserPassportInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="passport_info")
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, related_name="passport_info")
+    passport_full_name = EncryptedField(max_length=100)
+    passport_number = EncryptedField(max_length=200)
+    birth_date = models.DateField(null=True)
 
 # ============================
 # User Profile
@@ -24,33 +39,10 @@ class UserAvatar(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='avatar')
     avatar = models.ImageField(upload_to='avatar/')
 
-
-# ============================
-# Booking Status
-# ============================
-class BookingStatus(models.Model):
-    name = models.CharField(max_length=15)
-
     def __str__(self):
-        return self.name
+        return str(self.user)
 
 
-# ============================
-# Booking History
-# ============================
-class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="bookings")
-    status = models.ForeignKey(BookingStatus, on_delete=models.SET_NULL, null=True, related_name='bookings')
-
-    date = models.DateField()  # Travel date
-    guests = models.PositiveIntegerField(default=1)
-    price = models.PositiveIntegerField()
-    booking_date = models.DateField(auto_now_add=True)
-    rating = models.FloatField(null=True, blank=True)  # only for completed tours
-
-    def __str__(self):
-        return f"{self.user.username} - {self.tour.title}"
 
 
 # ============================
@@ -74,17 +66,14 @@ class Favorite(models.Model):
 class NotificationStatus(models.Model):
     name = models.CharField(max_length=15)
 
+    def __str__(self):
+        return self.name
+
 
 # ============================
 # Notifications
 # ============================
 class Notification(models.Model):
-    # NOTIF_TYPES = (
-    #     ("booking", "Booking"),
-    #     ("promo", "Promo"),
-    #     ("reminder", "Reminder"),
-    # )
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     notif_type = models.ForeignKey(NotificationStatus, on_delete=models.SET_NULL, null=True,
                                    related_name='notifications')
@@ -94,4 +83,4 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.username} - {self.title}"
+        return f"{self.user.username} - {self.notif_type}"

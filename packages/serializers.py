@@ -112,10 +112,11 @@ class TourSerializer(serializers.ModelSerializer):
 
 class TourBookingSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
+    agency = serializers.CharField(source='agency.name')
     class Meta:
         model = Tour
-        fields = ['title', 'agency', 'images']
+        fields = ['id', 'title', 'agency', 'images', 'traveling_date']
 
     def get_images(self, obj):
-        images_data = TourImage.objects.filter(tour=obj.pk)
-        return [i.url for i in images_data]
+        images_data = TourImage.objects.filter(tour=obj.pk).first()
+        return images_data.url
